@@ -24,8 +24,10 @@ Focus: **exclusion criteria**, **time-aligned exposure definition**, and **featu
 1) Create a `.env` file locally:
 ```bash
 cp .env.example .env
+```
 
 2) Edit .env with your database credentials.
 3) Run
 ```R
 source("R/99_run_all.R")
+```
