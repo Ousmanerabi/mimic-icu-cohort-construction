@@ -40,6 +40,6 @@ IAC exposure = 1 if arterial line placement occurs in `[MV start, MV start + 24h
 - Charlson comorbidity score (ICD9-based pragmatic proxy)
 
 ## How to Run
-1) Create a `.env` file locally (never commit it):
+1) Create a `.env` file locally:
 ```bash
 cp .env.example .env
