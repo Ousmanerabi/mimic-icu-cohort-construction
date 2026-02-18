@@ -1,45 +1,31 @@
-# MIMIC-III ICU Cohort Construction (R + SQL)
+# MIMIC-IV ICU Cohort Construction (R + SQL)
 
-This repository demonstrates an end-to-end **real-world EMR cohort construction workflow** using the public **MIMIC-III** ICU database (PostgreSQL) and reproducible R pipelines.
+End-to-end example of **real-world cohort construction** using **R + PostgreSQL SQL** on MIMIC-style ICU data.
+Focus: **exclusion criteria**, **time-aligned exposure definition**, and **feature engineering** in a reproducible pipeline.
 
-## Objective
-Build an **adult, non-surgical, first ICU stay** cohort and derive:
-- Mechanical ventilation start time (MV)
-- Exposure: arterial line placement within **0–24h post MV**
-- Covariates: vasopressors (0–24h), vitals and labs (0–24h), demographics, and Charlson comorbidity score
-- Outcome-ready variables (e.g., 28-day mortality logic can be added on top of MV start)
+## What this repo demonstrates
+- Cohort building from ICU stays with explicit **exclusion flags**
+- Defining **mechanical ventilation start** (procedure + chart events)
+- Exposure: **arterial line placement within 0–24h of MV start**
+- 0–24h feature engineering: **vasopressors, vitals, labs**
+- **Charlson comorbidity score** (pragmatic ICD9 proxy)
+- Clear separation of concerns: `/R` orchestrates, `/SQL` contains queries
 
-## Data Source
-MIMIC-III (PostgreSQL). No patient-level data are included in this repo.
-
-## Cohort Definition
-**Inclusion**
-- ICU stays with available `intime/outtime`
-- First ICU stay per subject
-
-**Exclusion flags**
-- ICU LOS < 2 days
-- Age < 16
-- Not first ICU stay
-- Surgical service (SURG/ORTHO)
-
-## Key Derivations
-### MV start
-MV start derived from:
-- Procedure events (intubation / invasive ventilation)
-- Chart events (ventilator mode / mechanically ventilated signals)
-Using the earliest available timestamp within ICU stay.
-
-### Exposure: arterial line (IAC)
-IAC exposure = 1 if arterial line placement occurs in `[MV start, MV start + 24h)`.
-
-### Covariates (0–24h post MV)
-- Vasopressors: norepinephrine, epinephrine, vasopressin, phenylephrine, dopamine
-- Vitals summary: HR, MAP, Temp, SpO2 (mean/min/max)
-- Labs summary: pH, PaO2, PaCO2, lactate, sodium, potassium, hematocrit, WBC (mean/min/max)
-- Charlson comorbidity score (ICD9-based pragmatic proxy)
+## Repo structure
+- `R/01_build_base_cohort.R` – base cohort + exclusions  
+- `R/02_define_mv_start.R` – MV start definition  
+- `R/03_exposure_iac.R` – IAC exposure (0–24h)  
+- `R/04_features_vitals_labs_vaso.R` – day-1 features  
+- `R/05_charlson_index.R` – Charlson score  
+- `R/99_run_all.R` – runs the full pipeline and saves outputs  
+- `SQL/*.sql` – all SQL queries
 
 ## How to Run
 1) Create a `.env` file locally:
 ```bash
 cp .env.example .env
+
+2) Edit .env with your database credentials.
+3) Run
+```R
+source("R/99_run_all.R")
